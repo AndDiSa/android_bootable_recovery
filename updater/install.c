@@ -41,6 +41,8 @@
 
 #include "flashutils/flashutils.h"
 
+struct selabel_handle *sehandle;
+
 #ifdef USE_EXT4
 #include "make_ext4fs.h"
 #endif
@@ -188,14 +190,16 @@ done:
 //    if fs_size < 0, then reserve that many bytes at the end of the partition
 Value* FormatFn(const char* name, State* state, int argc, Expr* argv[]) {
     char* result = NULL;
-    if (argc != 4) {
-        return ErrorAbort(state, "%s() expects 4 args, got %d", name, argc);
+    if (argc != 5) {
+        return ErrorAbort(state, "%s() expects 5 args, got %d", name, argc);
     }
     char* fs_type;
     char* partition_type;
     char* location;
     char* fs_size;
-    if (ReadArgs(state, argv, 4, &fs_type, &partition_type, &location, &fs_size) < 0) {
+    char* mount_point;
+
+    if (ReadArgs(state, argv, 5, &fs_type, &partition_type, &location, &fs_size, &mount_point) < 0) {
         return NULL;
     }
 
@@ -210,6 +214,11 @@ Value* FormatFn(const char* name, State* state, int argc, Expr* argv[]) {
     }
     if (strlen(location) == 0) {
         ErrorAbort(state, "location argument to %s() can't be empty", name);
+        goto done;
+    }
+
+    if (strlen(mount_point) == 0) {
+        ErrorAbort(state, "mount_point argument to %s() can't be empty", name);
         goto done;
     }
 
@@ -242,7 +251,7 @@ Value* FormatFn(const char* name, State* state, int argc, Expr* argv[]) {
         result = location;
 #ifdef USE_EXT4
     } else if (strcmp(fs_type, "ext4") == 0) {
-        int status = make_ext4fs(location, atoll(fs_size));
+        int status = make_ext4fs(location, atoll(fs_size), mount_point, sehandle);
         if (status != 0) {
             fprintf(stderr, "%s: make_ext4fs failed (%d) on %s",
                     name, status, location);

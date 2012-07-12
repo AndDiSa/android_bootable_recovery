@@ -44,6 +44,8 @@
 #include "extendedcommands.h"
 #include "flashutils/flashutils.h"
 
+struct selabel_handle *sehandle;
+
 static const struct option OPTIONS[] = {
   { "send_intent", required_argument, NULL, 's' },
   { "update_package", required_argument, NULL, 'u' },

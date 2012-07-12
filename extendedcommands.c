@@ -49,6 +49,8 @@ int signature_check_enabled = 1;
 int script_assert_enabled = 1;
 static const char *SDCARD_UPDATE_FILE = "/sdcard/update.zip";
 
+extern struct selabel_handle *sehandle;
+
 void
 toggle_signature_check()
 {
@@ -513,7 +515,7 @@ int format_device(const char *device, const char *path, const char *fs_type) {
             length = v->length;
         }
         reset_ext4fs_info();
-        int result = make_ext4fs(device, length);
+        int result = make_ext4fs(device, length, path, sehandle);
         if (result != 0) {
             LOGE("format_volume: make_extf4fs failed on %s\n", device);
             return -1;
