@@ -28,6 +28,7 @@ on init
     mkdir /datadata
     mkdir /emmc
     mkdir /system
+    mkdir /preoad
     mkdir /data
     mkdir /cache
     mount tmpfs tmpfs /tmp
